@@ -23,78 +23,93 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-#include <rules/DataPacket.h>
+//include <rules/DataPacket.h>
 
+use function count;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\resourcepacks\ResourcePack;
-use function count;
 
-class ResourcePacksInfoPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACKS_INFO_PACKET;
+class ResourcePacksInfoPacket extends DataPacket
+{
+    public const NETWORK_ID = ProtocolInfo::RESOURCE_PACKS_INFO_PACKET;
 
-	/** @var bool */
-	public $mustAccept = false; //if true, forces client to use selected resource packs
-	/** @var bool */
-	public $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
-	/** @var ResourcePack[] */
-	public $behaviorPackEntries = [];
-	/** @var ResourcePack[] */
-	public $resourcePackEntries = [];
+    /** @var bool */
+    public $mustAccept = false; //if true, forces client to use selected resource packs
+    /** @var bool */
+    public $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
+    /** @var ResourcePack[] */
+    public $behaviorPackEntries = [];
+    /** @var ResourcePack[] */
+    public $resourcePackEntries = [];
 
-	protected function decodePayload(){
-		$this->mustAccept = $this->getBool();
-		$this->hasScripts = $this->getBool();
-		$behaviorPackCount = $this->getLShort();
-		while($behaviorPackCount-- > 0){
-			$this->getString();
-			$this->getString();
-			$this->getLLong();
-			$this->getString();
-			$this->getString();
-			$this->getString();
-			$this->getBool();
-		}
+    private $ver;
 
-		$resourcePackCount = $this->getLShort();
-		while($resourcePackCount-- > 0){
-			$this->getString();
-			$this->getString();
-			$this->getLLong();
-			$this->getString();
-			$this->getString();
-			$this->getString();
-			$this->getBool();
-			$this->getBool();
-		}
-	}
+    public function __construct($version = 422)
+    {
+        $this->ver = $version;
+    }
 
-	protected function encodePayload(){
-		$this->putBool($this->mustAccept);
-		$this->putBool($this->hasScripts);
-		$this->putLShort(count($this->behaviorPackEntries));
-		foreach($this->behaviorPackEntries as $entry){
-			$this->putString($entry->getPackId());
-			$this->putString($entry->getPackVersion());
-			$this->putLLong($entry->getPackSize());
-			$this->putString(""); //TODO: encryption key
-			$this->putString(""); //TODO: subpack name
-			$this->putString(""); //TODO: content identity
-			$this->putBool(false); //TODO: has scripts (?)
-		}
-		$this->putLShort(count($this->resourcePackEntries));
-		foreach($this->resourcePackEntries as $entry){
-			$this->putString($entry->getPackId());
-			$this->putString($entry->getPackVersion());
-			$this->putLLong($entry->getPackSize());
-			$this->putString(""); //TODO: encryption key
-			$this->putString(""); //TODO: subpack name
-			$this->putString(""); //TODO: content identity
-			$this->putBool(false); //TODO: seems useless for resource packs
-			$this->putBool(false); //TODO: supports RTX
-		}
-	}
+    protected function decodePayload()
+    {
+        $this->mustAccept = $this->getBool();
+        $this->hasScripts = $this->getBool();
+        $behaviorPackCount = $this->getLShort();
+        while ($behaviorPackCount-- > 0) {
+            $this->getString();
+            $this->getString();
+            $this->getLLong();
+            $this->getString();
+            $this->getString();
+            $this->getString();
+            $this->getBool();
+        }
 
-	public function handle(NetworkSession $session) : bool{
-		return $session->handleResourcePacksInfo($this);
-	}
+        $resourcePackCount = $this->getLShort();
+        while ($resourcePackCount-- > 0) {
+            $this->getString();
+            $this->getString();
+            $this->getLLong();
+            $this->getString();
+            $this->getString();
+            $this->getString();
+            $this->getBool();
+            if (422 <= $this->ver) {
+                $this->getBool();
+            }
+        }
+    }
+
+    protected function encodePayload()
+    {
+        $this->putBool($this->mustAccept);
+        $this->putBool($this->hasScripts);
+        $this->putLShort(count($this->behaviorPackEntries));
+        foreach ($this->behaviorPackEntries as $entry) {
+            $this->putString($entry->getPackId());
+            $this->putString($entry->getPackVersion());
+            $this->putLLong($entry->getPackSize());
+            $this->putString(''); //TODO: encryption key
+            $this->putString(''); //TODO: subpack name
+            $this->putString(''); //TODO: content identity
+            $this->putBool(false); //TODO: has scripts (?)
+        }
+        $this->putLShort(count($this->resourcePackEntries));
+        foreach ($this->resourcePackEntries as $entry) {
+            $this->putString($entry->getPackId());
+            $this->putString($entry->getPackVersion());
+            $this->putLLong($entry->getPackSize());
+            $this->putString(''); //TODO: encryption key
+            $this->putString(''); //TODO: subpack name
+            $this->putString(''); //TODO: content identity
+            $this->putBool(false); //TODO: seems useless for resource packs
+            if (422 <= $this->ver) {
+                $this->putBool(false); //TODO: supports RTX
+            }
+        }
+    }
+
+    public function handle(NetworkSession $session): bool
+    {
+        return $session->handleResourcePacksInfo($this);
+    }
 }
