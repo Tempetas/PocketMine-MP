@@ -37,11 +37,11 @@ namespace pocketmine;
 
     const MIN_PHP_VERSION = '7.3.0';
 
-    /**
-     * @param string $message
-     *
-     * @return void
-     */
+/**
+ * @param string $message
+ *
+ * @return void
+ */
 function critical_error($message)
 {
     echo "[ERROR] $message".PHP_EOL;
@@ -53,9 +53,9 @@ function critical_error($message)
      * Enjoy it as much as I did writing it. I don't want to do it again.
      */
 
-    /**
-     * @return string[]
-     */
+/**
+ * @return string[]
+ */
 function check_platform_dependencies()
 {
     if (version_compare(MIN_PHP_VERSION, PHP_VERSION) > 0) {
@@ -124,9 +124,9 @@ function check_platform_dependencies()
     return $messages;
 }
 
-    /**
-     * @return void
-     */
+/**
+ * @return void
+ */
 function emit_performance_warnings(\Logger $logger)
 {
     if (extension_loaded('xdebug')) {
@@ -143,9 +143,9 @@ function emit_performance_warnings(\Logger $logger)
     }
 }
 
-    /**
-     * @return void
-     */
+/**
+ * @return void
+ */
 function set_ini_entries()
 {
     ini_set('allow_url_fopen', '1');
@@ -155,9 +155,9 @@ function set_ini_entries()
     ini_set('assert.exception', '1');
 }
 
-    /**
-     * @return void
-     */
+/**
+ * @return void
+ */
 function server()
 {
     if (count($messages = check_platform_dependencies()) > 0) {
