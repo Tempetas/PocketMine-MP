@@ -177,6 +177,9 @@ class StartGamePacket extends DataPacket{
 	/** @var bool */
 	public $enableNewInventorySystem = false; //TODO
 
+	public $rewindHistorySize = 0;
+	public $isServerAuthoritativeBlockBreaking = false;
+
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
@@ -236,7 +239,12 @@ class StartGamePacket extends DataPacket{
 		$this->premiumWorldTemplateId = $this->getString();
 		$this->isTrial = $this->getBool();
 		$this->playerMovementType = $this->getVarInt();
+		$this->playerMovementType = $this->getVarInt();
+		/*$this->rewindHistorySize = $this->getVarInt();
+		$this->isServerAuthoritativeBlockBreaking = $this->getBool();*/
 		$this->currentTick = $this->getLLong();
+
+		$this->putVarInt($this->enchantmentSeed);
 
 		$this->enchantmentSeed = $this->getVarInt();
 
@@ -318,6 +326,8 @@ class StartGamePacket extends DataPacket{
 		$this->putString($this->premiumWorldTemplateId);
 		$this->putBool($this->isTrial);
 		$this->putVarInt($this->playerMovementType);
+		/*$this->putVarInt($this->rewindHistorySize);
+		$this->putBool($this->isServerAuthoritativeBlockBreaking);*/
 		$this->putLLong($this->currentTick);
 
 		$this->putVarInt($this->enchantmentSeed);
